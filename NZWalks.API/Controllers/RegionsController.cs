@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Repositories;
 
@@ -8,16 +9,19 @@ namespace NZWalks.API.Controllers;
 public class RegionsController : Controller
 {
     private readonly IRegionRepository regionRepository;
+    private readonly IMapper mapper;
 
-    public RegionsController(IRegionRepository regionRepository)
+    public RegionsController(IRegionRepository regionRepository, IMapper mapper)
     {
         this.regionRepository = regionRepository;
+        this.mapper = mapper;
     }
 
     [HttpGet]
     public IActionResult GetAllRegions()
     {
-        var regions = regionRepository.GetAll();
-        return Ok(regions);
+        // Return DTO regions:
+        var regionsDTO = mapper.Map<List<Models.DTO.Region>>(regionRepository.GetAll());
+        return Ok(regionsDTO);
     }
 }

@@ -18,10 +18,11 @@ public class RegionsController : Controller
     }
 
     [HttpGet]
-    public IActionResult GetAllRegions()
+    public async Task<IActionResult> GetAllRegions()
     {
+        var regions = await regionRepository.GetAllAsync();
         // Return DTO regions:
-        var regionsDTO = mapper.Map<List<Models.DTO.Region>>(regionRepository.GetAll());
+        var regionsDTO = mapper.Map<List<Models.DTO.Region>>(regions);
         return Ok(regionsDTO);
     }
 }

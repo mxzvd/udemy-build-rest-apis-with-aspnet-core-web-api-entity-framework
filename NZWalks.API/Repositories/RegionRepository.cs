@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 
@@ -12,8 +13,8 @@ public class RegionRepository : IRegionRepository
         this.dbContext = dbContext;
     }
 
-    public IEnumerable<Region> GetAll()
+    public async Task<IEnumerable<Region>> GetAllAsync()
     {
-        return dbContext.Regions.ToList();
+        return await dbContext.Regions.ToListAsync();
     }
 }

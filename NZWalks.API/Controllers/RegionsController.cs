@@ -1,7 +1,9 @@
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
+using NZWalks.API.Validators;
 
 namespace NZWalks.API.Controllers;
 
@@ -47,9 +49,12 @@ public class RegionsController : Controller
     [HttpPost]
     public async Task<IActionResult> AddRegionAsync(AddRegionRequest request)
     {
-        // Validate the request:
-        if (!ValidateAddRegionAsync(request))
+        var validator = new AddRegionRequestValidator();
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
         {
+            validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
 
@@ -108,9 +113,12 @@ public class RegionsController : Controller
     [Route("{id:guid}")]
     public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] UpdateRegionRequest request)
     {
-        // Validate the request:
-        if (!ValidateUpdateRegionAsync(request))
+        var validator = new UpdateRegionRequestValidator();
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
         {
+            validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
 
@@ -149,80 +157,4 @@ public class RegionsController : Controller
         // Return Ok response:
         return Ok(regionDTO);
     }
-
-    #region Validations
-
-    private bool ValidateAddRegionAsync(AddRegionRequest request)
-    {
-        if (request == null)
-        {
-            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Code))
-        {
-            ModelState.AddModelError(nameof(request.Code), $"{nameof(request.Code)} must not be null or empty or whitespace.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            ModelState.AddModelError(nameof(request.Name), $"{nameof(request.Name)} must not be null or empty or whitespace.");
-        }
-
-        if (request.Area <= 0)
-        {
-            ModelState.AddModelError(nameof(request.Area), $"{nameof(request.Area)} must be positive.");
-        }
-
-        if (request.Population < 0)
-        {
-            ModelState.AddModelError(nameof(request.Population), $"{nameof(request.Population)} must be non-negative.");
-        }
-
-        if (ModelState.ErrorCount > 0)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool ValidateUpdateRegionAsync(UpdateRegionRequest request)
-    {
-        if (request == null)
-        {
-            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Code))
-        {
-            ModelState.AddModelError(nameof(request.Code), $"{nameof(request.Code)} must not be null or empty or whitespace.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            ModelState.AddModelError(nameof(request.Name), $"{nameof(request.Name)} must not be null or empty or whitespace.");
-        }
-
-        if (request.Area <= 0)
-        {
-            ModelState.AddModelError(nameof(request.Area), $"{nameof(request.Area)} must be positive.");
-        }
-
-        if (request.Population < 0)
-        {
-            ModelState.AddModelError(nameof(request.Population), $"{nameof(request.Population)} must be non-negative.");
-        }
-
-        if (ModelState.ErrorCount > 0)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    #endregion
 }

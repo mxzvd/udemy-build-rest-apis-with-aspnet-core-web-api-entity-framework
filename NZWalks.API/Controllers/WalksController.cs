@@ -11,11 +11,15 @@ public class WalksController : Controller
 {
     private readonly IWalkRepository walkRepository;
     private readonly IMapper mapper;
+    private readonly IRegionRepository regionRepository;
+    private readonly IWalkDifficultyRepository walkDifficultyRepository;
 
-    public WalksController(IWalkRepository walkRepository, IMapper mapper)
+    public WalksController(IWalkRepository walkRepository, IMapper mapper, IRegionRepository regionRepository, IWalkDifficultyRepository walkDifficultyRepository)
     {
         this.walkRepository = walkRepository;
         this.mapper = mapper;
+        this.regionRepository = regionRepository;
+        this.walkDifficultyRepository = walkDifficultyRepository;
     }
 
     [HttpGet]
@@ -45,6 +49,12 @@ public class WalksController : Controller
     [HttpPost]
     public async Task<IActionResult> AddWalkAsync([FromBody] AddWalkRequest request)
     {
+        // Validate:
+        if(!(await ValidateAddWalkAsync(request)))
+        {
+            return BadRequest(ModelState);
+        }
+
         // Convert DTO to domain object:
         var walkDomain = new Models.Domain.Walk
         {
@@ -75,6 +85,12 @@ public class WalksController : Controller
     [Route("{id:guid}")]
     public async Task<IActionResult> UpdateWalkAsync([FromRoute] Guid id, [FromBody] UpdateWalkRequest request)
     {
+        // Validate:
+        if(!(await ValidateUpdateWalkAsync(request)))
+        {
+            return BadRequest(ModelState);
+        }
+
         // Convert the DTO to domain object:
         var walkDomain = new Models.Domain.Walk{
             Length = request.Length,
@@ -121,4 +137,88 @@ public class WalksController : Controller
         var walkDTO = mapper.Map<Models.DTO.Walk>(walkDomain);
         return Ok(walkDTO);
     }
+
+    #region Validations
+
+    private async Task<bool> ValidateAddWalkAsync(AddWalkRequest request)
+    {
+        if (request == null)
+        {
+            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            ModelState.AddModelError(nameof(request.Name), $"{nameof(request.Name)} must not be null or empty or whitespace.");
+        }
+
+        if (request.Length <= 0)
+        {
+            ModelState.AddModelError(nameof(request.Length), $"{nameof(request.Length)} must be positive.");
+        }
+
+        var region = await regionRepository.GetAsync(request.RegionId);
+
+        if (region == null)
+        {
+            ModelState.AddModelError(nameof(request.RegionId), $"{nameof(request.Length)} is invalid.");
+        }
+
+        var walkDifficulty = await walkDifficultyRepository.GetAsync(request.WalkDifficultyId);
+
+        if (walkDifficulty == null)
+        {
+            ModelState.AddModelError(nameof(request.WalkDifficultyId), $"{nameof(request.WalkDifficultyId)} is invalid.");
+        }
+
+        if (ModelState.ErrorCount > 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ValidateUpdateWalkAsync(UpdateWalkRequest request)
+    {
+        if (request == null)
+        {
+            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            ModelState.AddModelError(nameof(request.Name), $"{nameof(request.Name)} must not be null or empty or whitespace.");
+        }
+
+        if (request.Length <= 0)
+        {
+            ModelState.AddModelError(nameof(request.Length), $"{nameof(request.Length)} must be positive.");
+        }
+
+        var region = await regionRepository.GetAsync(request.RegionId);
+
+        if (region == null)
+        {
+            ModelState.AddModelError(nameof(request.RegionId), $"{nameof(request.Length)} is invalid.");
+        }
+
+        var walkDifficulty = await walkDifficultyRepository.GetAsync(request.WalkDifficultyId);
+
+        if (walkDifficulty == null)
+        {
+            ModelState.AddModelError(nameof(request.WalkDifficultyId), $"{nameof(request.WalkDifficultyId)} is invalid.");
+        }
+
+        if (ModelState.ErrorCount > 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    #endregion
 }

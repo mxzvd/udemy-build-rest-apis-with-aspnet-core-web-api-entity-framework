@@ -1,7 +1,9 @@
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
+using NZWalks.API.Validators;
 
 namespace NZWalks.API.Controllers;
 
@@ -45,9 +47,12 @@ public class WalkDifficultiesController : Controller
     [HttpPost]
     public async Task<IActionResult> AddWalkDifficultyAsync(Models.DTO.AddWalkDifficultyRequest request)
     {
-        // Validate the incoming request:
-        if (!ValidateAddWalkDifficultyAsync(request))
+        var validator = new AddWalkDifficultyRequestValidator();
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
         {
+            validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
 
@@ -71,9 +76,12 @@ public class WalkDifficultiesController : Controller
     [Route("{id:guid}")]
     public async Task<IActionResult> UpdateWalkDifficultyAsync(Guid id, UpdateWalkDifficultyRequest request)
     {
-        // Validate the incoming request:
-        if (!ValidateUpdateWalkDifficultyAsync(request))
+        var validator = new UpdateWalkDifficultyRequestValidator();
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
         {
+            validationResult.AddToModelState(ModelState);
             return BadRequest(ModelState);
         }
 
@@ -113,50 +121,4 @@ public class WalkDifficultiesController : Controller
 
         return Ok(walkDifficultyDTO);
     }
-
-    #region Validations
-
-    private bool ValidateAddWalkDifficultyAsync(AddWalkDifficultyRequest request)
-    {
-        if (request == null)
-        {
-            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Code))
-        {
-            ModelState.AddModelError(nameof(request.Code), $"{nameof(request.Code)} must not be null or empty or whitespace.");
-        }
-
-        if (ModelState.ErrorCount > 0)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool ValidateUpdateWalkDifficultyAsync(UpdateWalkDifficultyRequest request)
-    {
-        if (request == null)
-        {
-            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Code))
-        {
-            ModelState.AddModelError(nameof(request.Code), $"{nameof(request.Code)} must not be null or empty or whitespace.");
-        }
-
-        if (ModelState.ErrorCount > 0)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    #endregion
 }

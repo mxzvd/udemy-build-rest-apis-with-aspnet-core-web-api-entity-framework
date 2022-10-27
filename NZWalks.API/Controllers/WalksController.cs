@@ -1,7 +1,9 @@
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
+using NZWalks.API.Validators;
 
 namespace NZWalks.API.Controllers;
 
@@ -142,20 +144,12 @@ public class WalksController : Controller
 
     private async Task<bool> ValidateAddWalkAsync(AddWalkRequest request)
     {
-        if (request == null)
-        {
-            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
-            return false;
-        }
+        var validator = new AddWalkRequestValidator();
+        var validationResult = await validator.ValidateAsync(request);
 
-        if (string.IsNullOrWhiteSpace(request.Name))
+        if (!validationResult.IsValid)
         {
-            ModelState.AddModelError(nameof(request.Name), $"{nameof(request.Name)} must not be null or empty or whitespace.");
-        }
-
-        if (request.Length <= 0)
-        {
-            ModelState.AddModelError(nameof(request.Length), $"{nameof(request.Length)} must be positive.");
+            validationResult.AddToModelState(ModelState);
         }
 
         var region = await regionRepository.GetAsync(request.RegionId);
@@ -182,20 +176,12 @@ public class WalksController : Controller
 
     private async Task<bool> ValidateUpdateWalkAsync(UpdateWalkRequest request)
     {
-        if (request == null)
-        {
-            ModelState.AddModelError(nameof(request), $"Request can not be empty.");
-            return false;
-        }
+        var validator = new UpdateWalkRequestValidator();
+        var validationResult = await validator.ValidateAsync(request);
 
-        if (string.IsNullOrWhiteSpace(request.Name))
+        if (!validationResult.IsValid)
         {
-            ModelState.AddModelError(nameof(request.Name), $"{nameof(request.Name)} must not be null or empty or whitespace.");
-        }
-
-        if (request.Length <= 0)
-        {
-            ModelState.AddModelError(nameof(request.Length), $"{nameof(request.Length)} must be positive.");
+            validationResult.AddToModelState(ModelState);
         }
 
         var region = await regionRepository.GetAsync(request.RegionId);

@@ -22,6 +22,7 @@ public class RegionsController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "reader")]
     public async Task<IActionResult> GetAllRegionsAsync()
     {
         var regions = await regionRepository.GetAllAsync();
@@ -33,6 +34,7 @@ public class RegionsController : Controller
     [HttpGet]
     [Route("{id:guid}")]
     [ActionName("GetRegionAsync")]
+    [Authorize(Roles = "reader")]
     public async Task<IActionResult> GetRegionAsync(Guid id)
     {
         var region = await regionRepository.GetAsync(id);
@@ -48,7 +50,7 @@ public class RegionsController : Controller
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> AddRegionAsync(AddRegionRequest request)
     {
         var validator = new AddRegionRequestValidator();
@@ -88,7 +90,7 @@ public class RegionsController : Controller
 
     [HttpDelete]
     [Route("{id:guid}")]
-    [Authorize]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> DeleteRegionAsync(Guid id)
     {
         var region = await regionRepository.DeleteAsync(id);
@@ -114,7 +116,7 @@ public class RegionsController : Controller
 
     [HttpPut]
     [Route("{id:guid}")]
-    [Authorize]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] UpdateRegionRequest request)
     {
         var validator = new UpdateRegionRequestValidator();

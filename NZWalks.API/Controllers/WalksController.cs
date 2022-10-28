@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -25,6 +26,7 @@ public class WalksController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "reader")]
     public async Task<IActionResult> GetAllWalksAsync()
     {
         var walksDomain = await walkRepository.GetAllAsync();
@@ -35,6 +37,7 @@ public class WalksController : Controller
     [HttpGet]
     [Route("{id:guid}")]
     [ActionName("GetWalkAsync")]
+    [Authorize(Roles = "reader")]
     public async Task<IActionResult> GetWalkAsync(Guid id)
     {
         var walkDomain = await walkRepository.GetAsync(id);
@@ -49,6 +52,7 @@ public class WalksController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> AddWalkAsync([FromBody] AddWalkRequest request)
     {
         // Validate:
@@ -85,6 +89,7 @@ public class WalksController : Controller
 
     [HttpPut]
     [Route("{id:guid}")]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> UpdateWalkAsync([FromRoute] Guid id, [FromBody] UpdateWalkRequest request)
     {
         // Validate:
@@ -126,6 +131,7 @@ public class WalksController : Controller
 
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> DeleteWalkAsync([FromRoute] Guid id)
     {
         // Call repository to delete object:

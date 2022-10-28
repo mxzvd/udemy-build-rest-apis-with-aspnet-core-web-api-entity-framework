@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -21,6 +22,7 @@ public class WalkDifficultiesController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "reader")]
     public async Task<IActionResult> GetAllWalkDifficultiesAsync()
     {
         var walkDifficultyList = await walkDifficultyRepository.GetAllAsync();
@@ -30,6 +32,7 @@ public class WalkDifficultiesController : Controller
     [HttpGet]
     [Route("{id:guid}")]
     [ActionName("GetWalkDifficultyAsync")]
+    [Authorize(Roles = "reader")]
     public async Task<IActionResult> GetWalkDifficultyAsync(Guid id)
     {
         var walkDifficulty = await walkDifficultyRepository.GetAsync(id);
@@ -45,6 +48,7 @@ public class WalkDifficultiesController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> AddWalkDifficultyAsync(Models.DTO.AddWalkDifficultyRequest request)
     {
         var validator = new AddWalkDifficultyRequestValidator();
@@ -74,6 +78,7 @@ public class WalkDifficultiesController : Controller
 
     [HttpPut]
     [Route("{id:guid}")]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> UpdateWalkDifficultyAsync(Guid id, UpdateWalkDifficultyRequest request)
     {
         var validator = new UpdateWalkDifficultyRequestValidator();
@@ -108,6 +113,7 @@ public class WalkDifficultiesController : Controller
 
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize(Roles = "writer")]
     public async Task<IActionResult> DeleteWalkDifficultyAsync(Guid id)
     {
         var walkDifficultyDomain = await walkDifficultyRepository.DeleteAsync(id);

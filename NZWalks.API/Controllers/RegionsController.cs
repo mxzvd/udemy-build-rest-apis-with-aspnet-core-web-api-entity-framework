@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -47,6 +48,7 @@ public class RegionsController : Controller
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> AddRegionAsync(AddRegionRequest request)
     {
         var validator = new AddRegionRequestValidator();
@@ -86,6 +88,7 @@ public class RegionsController : Controller
 
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> DeleteRegionAsync(Guid id)
     {
         var region = await regionRepository.DeleteAsync(id);
@@ -111,6 +114,7 @@ public class RegionsController : Controller
 
     [HttpPut]
     [Route("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] UpdateRegionRequest request)
     {
         var validator = new UpdateRegionRequestValidator();
